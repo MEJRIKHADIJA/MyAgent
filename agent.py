@@ -161,9 +161,9 @@ def classify_intent(query: str) -> Intent:
     # --- direct: identity / greetings ---
     direct_triggers = [
         "who are you", "what are you", "what can you do",
-        "your name", "help",
+        "your name",
     ]
-    if lower in {"hello", "hi", "hey"}:
+    if lower in {"hello", "hi", "hey", "help"}:
         return "direct"
     if any(t in lower for t in direct_triggers):
         return "direct"
@@ -179,16 +179,47 @@ def classify_intent(query: str) -> Intent:
     if re.search(r"\bwhat\s+is\s+\d", lower):
         return "calc"
 
-    # --- search: everything else that sounds like a lookup ---
-    search_keywords = [
-        "search", "find", "look up", "who is", "what is",
-        "tell me about", "news", "latest", "explain",
-        "history", "where is", "describe",
-    ]
-    if any(kw in lower for kw in search_keywords):
+    if needs_search(lower):
         return "search"
 
     return "direct"
+
+
+def needs_search(query: str) -> bool:
+    lower = query.lower().strip()
+
+    freshness_keywords = [
+        "latest", "recent", "current", "today", "yesterday",
+        "this week", "this month", "right now", "breaking",
+        "news", "headlines", "trending", "updates", "what's new",
+        "what is new", "new in", "new with",
+    ]
+    if any(keyword in lower for keyword in freshness_keywords):
+        return True
+
+    # --- search: everything else that sounds like a lookup ---
+    search_keywords = [
+        "search", "find", "look up", "who is", "what is",
+        "tell me about", "news", "latest", "recent",
+        "current events", "headlines", "explain",
+        "history", "where is", "describe",
+    ]
+    if any(kw in lower for kw in search_keywords):
+        return True
+
+    lookup_question = (
+        r"^(who|what|where|when|which)\b|"
+        r"^how\s+(many|much|old|far|long|tall|big|large|small|fast)\b"
+    )
+    if re.search(lookup_question, lower):
+        return True
+
+    factual_entities = [
+        "price", "stock", "weather", "score", "schedule",
+        "release date", "version", "ceo", "president", "capital",
+        "population", "definition", "meaning",
+    ]
+    return any(keyword in lower for keyword in factual_entities)
 
 
 def _fallback_system_prompt(reason: str) -> str:

@@ -358,7 +358,7 @@ async def root() -> HTMLResponse:
 
     <div class="suggestions" aria-label="Example prompts">
       <button type="button" data-query="What is sqrt(144) + 5?">Calculate</button>
-      <button type="button" data-query="What are the news for today?">Today’s news</button>
+      <button type="button" data-query="Latest world news today">Today’s news</button>
       <button type="button" data-query="Hello how are you?">Say hello</button>
     </div>
 

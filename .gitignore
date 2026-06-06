@@ -1,19 +1,23 @@
-@"
-# environment variables — never push this
+# Environment variables — never push this.
 .env
 
-# virtual environment
+# Virtual environments.
 venv/
 .venv/
 
-# python cache
+# Python cache.
 __pycache__/
 *.pyc
 *.pyo
 
-# logs
-agent_log.txt
+# Test/cache output.
+.pytest_cache/
+pytest-cache-files-*/
 
-# OS files
+# Logs.
+agent_log.txt
+agent.log
+
+# OS files.
 Thumbs.db
-"@ | Set-Content .gitignore
+.DS_Store
