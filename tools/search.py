@@ -5,7 +5,10 @@ import re
 import threading
 from typing import Any
 
-from duckduckgo_search import DDGS
+try:
+    from ddgs import DDGS
+except ImportError:
+    from duckduckgo_search import DDGS
 
 from errors import ToolError
 
@@ -21,6 +24,7 @@ _STOP_WORDS = {
 MIN_RESULT_LENGTH = 40
 MAX_RESULTS       = 3
 TIMEOUT_SECONDS   = 8
+MAX_QUERY_ATTEMPTS = 2
 
 
 def run(query: str, max_results: int = MAX_RESULTS, timeout_seconds: int = TIMEOUT_SECONDS) -> str:
@@ -60,18 +64,15 @@ def run(query: str, max_results: int = MAX_RESULTS, timeout_seconds: int = TIMEO
 
 def _search_duckduckgo(query: str, max_results: int) -> str:
     ddgs = DDGS()
-    candidate_queries = _candidate_queries(query)
+    candidate_queries = _candidate_queries(query)[:MAX_QUERY_ATTEMPTS]
     attempts = []
-
-    if _is_news_query(query):
-        for candidate in candidate_queries:
-            attempts.extend([
-                lambda candidate=candidate: ddgs.news(candidate, max_results=max_results, timelimit="d"),
-                lambda candidate=candidate: ddgs.news(candidate, max_results=max_results, timelimit="w"),
-            ])
 
     for candidate in candidate_queries:
         attempts.append(lambda candidate=candidate: ddgs.text(candidate, max_results=max_results))
+
+    if _is_news_query(query) and candidate_queries:
+        candidate = candidate_queries[0]
+        attempts.append(lambda candidate=candidate: ddgs.news(candidate, max_results=max_results, timelimit="w"))
 
     errors = []
     for attempt in attempts:
@@ -80,6 +81,8 @@ def _search_duckduckgo(query: str, max_results: int) -> str:
             _validate_answer(query, answer)
             return answer
         except ToolError as exc:
+            errors.append(str(exc))
+        except Exception as exc:
             errors.append(str(exc))
 
     reason = "; ".join(errors) if errors else "no search results"
