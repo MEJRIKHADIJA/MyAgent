@@ -1,0 +1,11 @@
+2026-06-05 13:43:54,243 INFO {"route": "calculator", "query": "What is 2 + 2 * 3?", "success": true}
+2026-06-05 13:44:03,614 INFO {"route": "search", "query": "Search the web for latest Python release", "success": true, "error": "LLM summary fallback: Groq request failed: Connection error."}
+2026-06-05 13:44:12,815 INFO {"route": "llm", "query": "Explain FastAPI", "success": false, "error": "Groq request failed: Connection error."}
+2026-06-05 13:44:12,831 ERROR Agent failed to answer query
+Traceback (most recent call last):
+  File "C:\Users\khady\OneDrive\Bureau\MyAgent\main.py", line 37, in ask
+    result = agent.answer(request.query)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\khady\OneDrive\Bureau\MyAgent\test_agent.py", line 80, in fake_answer
+    raise AgentError("broken")
+agent.AgentError: broken
